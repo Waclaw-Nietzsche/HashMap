@@ -2,11 +2,11 @@ package Models;
 
 public class ElementOfMap<K,V>
 {
-    int hashcode;
-    K key;
-    V value;
+    public int hashcode;
+    public K key;
+    public V value;
 
-    protected ElementOfMap(int hashcode, K key, V value)
+    public ElementOfMap(int hashcode, K key, V value)
     {
         this.hashcode = hashcode;
         this.key = key;
