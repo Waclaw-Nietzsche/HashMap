@@ -1,5 +1,6 @@
 import Interfaces.Map;
 import Realizations.CoarseHashMap;
+import Realizations.StripedCuckooHashMap;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -114,6 +115,7 @@ public class Main
         ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<Map<Integer, Integer>>();
 
         hashmapList.add(new CoarseHashMap<>(hashmapSize));
+        hashmapList.add(new StripedCuckooHashMap<Integer, Integer>(hashmapSize));
 
         for (int currentHashMapIndex = 0; currentHashMapIndex < hashmapList.size(); currentHashMapIndex += 1)
         {
@@ -173,6 +175,9 @@ public class Main
             {
                 case 0:
                     System.out.println("Текущий алгоритм: CoarseHashMap");
+                    break;
+                case 1:
+                    System.out.println("Текущий алгоритм: StripedCuckooHashMap");
                     break;
             }
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract class HashMap<K,V> implements Map<K,V>
 {
-    protected List<ElementOfMap<K,V>>[] table;
+    protected List<ElementOfMap<K,V>>[] map;
     protected int size;
 
     // Замыкание
@@ -22,10 +22,10 @@ public abstract class HashMap<K,V> implements Map<K,V>
     public HashMap(int capacity)
     {
         size = 0;
-        table = (List<ElementOfMap<K,V>>[]) new List[capacity];
+        map = (List<ElementOfMap<K,V>>[]) new List[capacity];
         for (int i = 0; i < capacity; i++)
         {
-            table[i] = new ArrayList<ElementOfMap<K, V>>();
+            map[i] = new ArrayList<ElementOfMap<K, V>>();
         }
     }
 
@@ -44,9 +44,9 @@ public abstract class HashMap<K,V> implements Map<K,V>
             {
                 int hashcode = key.hashCode();
                 // Позволяет избежать проблем с отрицательными числами и выходом за предел (с формуов)
-                int index = (hashcode & 0x7FFFFFFF) % table.length;
+                int index = (hashcode & 0x7FFFFFFF) % map.length;
                 // Это foreach
-                for (ElementOfMap<K,V> elementOfMap : table[index])
+                for (ElementOfMap<K,V> elementOfMap : map[index])
                 {
                     if (elementOfMap.hashcode == hashcode && elementOfMap.key.equals(key))
                     {
@@ -56,7 +56,7 @@ public abstract class HashMap<K,V> implements Map<K,V>
                         return lastValue;
                     }
                 }
-                table[index].add(new ElementOfMap<K,V>(hashcode, key, value));
+                map[index].add(new ElementOfMap<K,V>(hashcode, key, value));
                 size++;
             }
         }
@@ -81,8 +81,8 @@ public abstract class HashMap<K,V> implements Map<K,V>
         try
         {
             int hashcode = key.hashCode();
-            int index = (hashcode & 0x7FFFFFFF) % table.length;
-            for (ElementOfMap<K,V> elementOfMap : table[index])
+            int index = (hashcode & 0x7FFFFFFF) % map.length;
+            for (ElementOfMap<K,V> elementOfMap : map[index])
             {
                 if (elementOfMap.hashcode == hashcode && elementOfMap.key.equals(key))
                 {
@@ -106,13 +106,13 @@ public abstract class HashMap<K,V> implements Map<K,V>
         try
         {
             int hashcode = key.hashCode();
-            int index = (hashcode & 0x7FFFFFFF) % table.length;
-            for (ElementOfMap<K,V> elementOfMap : table[index])
+            int index = (hashcode & 0x7FFFFFFF) % map.length;
+            for (ElementOfMap<K,V> elementOfMap : map[index])
             {
                 if (elementOfMap.hashcode == hashcode && elementOfMap.key.equals(key))
                 {
                     V result = elementOfMap.value;
-                    table[index].remove(elementOfMap);
+                    map[index].remove(elementOfMap);
                     size--;
 
                     return result;
@@ -135,8 +135,8 @@ public abstract class HashMap<K,V> implements Map<K,V>
         try
         {
             int hashcode = key.hashCode();
-            int index = (hashcode & 0x7FFFFFFF) % table.length;
-            for (ElementOfMap<K,V> elementOfMap : table[index])
+            int index = (hashcode & 0x7FFFFFFF) % map.length;
+            for (ElementOfMap<K,V> elementOfMap : map[index])
             {
                 if (elementOfMap.hashcode == hashcode && elementOfMap.key.equals(key))
                 {

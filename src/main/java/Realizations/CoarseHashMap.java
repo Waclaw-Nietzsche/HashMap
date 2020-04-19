@@ -33,29 +33,29 @@ public class CoarseHashMap<K,V> extends HashMap<K,V>
     @Override
     public void resize()
     {
-        int lastCapacity = table.length;
+        int lastCapacity = map.length;
 
         lock.lock();
         try
         {
-            if (lastCapacity != table.length)
+            if (lastCapacity != map.length)
             {
                 return;
             }
             int newCapacity = lastCapacity * 2;
-            List<ElementOfMap<K, V>>[] oldTable = table;
-            table = (List<ElementOfMap<K,V>>[]) new List[newCapacity];
+            List<ElementOfMap<K, V>>[] lastMap = map;
+            map = (List<ElementOfMap<K,V>>[]) new List[newCapacity];
             for (int i = 0; i < newCapacity; i++)
             {
-                table[i] = new ArrayList<ElementOfMap<K,V>>();
+                map[i] = new ArrayList<ElementOfMap<K,V>>();
             }
-            for (List<ElementOfMap<K,V>> bucket : oldTable)
+            for (List<ElementOfMap<K,V>> bucket : lastMap)
             {
                 for (ElementOfMap<K,V> elementOfMap : bucket)
                 {
                     int hashcode = elementOfMap.key.hashCode();
-                    int index = (hashcode & 0x7FFFFFFF) % table.length;
-                    table[index].add(elementOfMap);
+                    int index = (hashcode & 0x7FFFFFFF) % map.length;
+                    map[index].add(elementOfMap);
                 }
             }
         }
@@ -68,6 +68,6 @@ public class CoarseHashMap<K,V> extends HashMap<K,V>
     @Override
     public boolean policy()
     {
-        return size / table.length > 4;
+        return size / map.length > 4;
     }
 }
