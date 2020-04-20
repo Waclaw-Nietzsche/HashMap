@@ -1,5 +1,7 @@
 import Interfaces.Map;
 import Realizations.CoarseHashMap;
+import Realizations.RefinableCuckooHashMap;
+import Realizations.RefinableHashMap;
 import Realizations.StripedCuckooHashMap;
 
 import java.util.ArrayList;
@@ -115,7 +117,9 @@ public class Main
         ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<Map<Integer, Integer>>();
 
         hashmapList.add(new CoarseHashMap<>(hashmapSize));
+        hashmapList.add(new RefinableHashMap<>(hashmapSize));
         hashmapList.add(new StripedCuckooHashMap<Integer, Integer>(hashmapSize));
+        hashmapList.add(new RefinableCuckooHashMap<Integer, Integer>(hashmapSize));
 
         for (int currentHashMapIndex = 0; currentHashMapIndex < hashmapList.size(); currentHashMapIndex += 1)
         {
@@ -177,7 +181,13 @@ public class Main
                     System.out.println("Текущий алгоритм: CoarseHashMap");
                     break;
                 case 1:
+                    System.out.println("Текущий алгоритм: RefinableHashMap");
+                    break;
+                case 2:
                     System.out.println("Текущий алгоритм: StripedCuckooHashMap");
+                    break;
+                case 3:
+                    System.out.println("Текущий алгоритм: RefinableCuckooHashMap");
                     break;
             }
 
