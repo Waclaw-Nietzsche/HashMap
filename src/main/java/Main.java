@@ -1,8 +1,5 @@
 import Interfaces.Map;
-import Realizations.CoarseHashMap;
-import Realizations.RefinableCuckooHashMap;
-import Realizations.RefinableHashMap;
-import Realizations.StripedCuckooHashMap;
+import Realizations.*;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -120,6 +117,7 @@ public class Main
         hashmapList.add(new RefinableHashMap<>(hashmapSize));
         hashmapList.add(new StripedCuckooHashMap<Integer, Integer>(hashmapSize));
         hashmapList.add(new RefinableCuckooHashMap<Integer, Integer>(hashmapSize));
+        hashmapList.add(new ConcurrentHopscotchHashMap<Integer, Integer>(hashmapSize, runsOfAlgorithm));
 
         for (int currentHashMapIndex = 0; currentHashMapIndex < hashmapList.size(); currentHashMapIndex += 1)
         {
@@ -188,6 +186,9 @@ public class Main
                     break;
                 case 3:
                     System.out.println("Текущий алгоритм: RefinableCuckooHashMap");
+                    break;
+                case 4:
+                    System.out.println("Текущий алгоритм: ConcurrentHopscotchHashMap");
                     break;
             }
 
