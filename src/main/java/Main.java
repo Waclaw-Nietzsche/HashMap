@@ -10,7 +10,7 @@ public class Main {
     private final static int HASH_MAP_SIZE = 1000;
     private final static int MAX_THREADS_COUNT = 16;
     private final static int THREAD_MULTIPLY_VALUE = 2;
-    private final static int OPERATIONS_PER_THREAD = 1000000;
+    private final static int OPERATIONS_PER_THREAD = 100000;
     private final static float ADD_RATIO = 0.25F;
     private final static float GET_RATIO = 0.25F;
     private final static float REMOVE_RATIO = 0.25F;
@@ -22,6 +22,7 @@ public class Main {
 
         List<String> result = new ArrayList<>();
 
+        System.out.println("Threads count,CoarseHashMap,RefinableHashMap,StripedCuckooHashmap,RefinableCuckooHashMap,ConcurrentHopscotchHashMap");
         for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_MULTIPLY_VALUE) {
             hashmapList.clear();
 
@@ -31,6 +32,7 @@ public class Main {
             hashmapList.add(new RefinableCuckooHashMap<>(HASH_MAP_SIZE));
             hashmapList.add(new ConcurrentHopscotchHashMap<>(HASH_MAP_SIZE, currentThreadCount));
 
+            System.out.print("\n" + currentThreadCount + ",");
             for (Map<Integer, Integer> hashMap : hashmapList) {
                 long totalTime = 0;
                 ArrayList<Thread> threadList = new ArrayList<>();
@@ -75,7 +77,7 @@ public class Main {
                 totalTime += estimatedTime;
 
                 // Общее время работы
-                System.out.println(currentThreadCount + "," + hashMap + "," + (double) totalTime / currentThreadCount / 1000000);
+                System.out.print((double) totalTime / currentThreadCount / 1000000 + ",");
             }
         }
     }
