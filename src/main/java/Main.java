@@ -2,7 +2,6 @@ import Interfaces.Map;
 import Realizations.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
@@ -20,9 +19,7 @@ public class Main {
 
         ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<>();
 
-        List<String> result = new ArrayList<>();
-
-        System.out.println("Threads count,CoarseHashMap,RefinableHashMap,StripedCuckooHashmap,RefinableCuckooHashMap,ConcurrentHopscotchHashMap");
+        StringBuilder result = new StringBuilder("Threads count,CoarseHashMap,RefinableHashMap,StripedCuckooHashmap,RefinableCuckooHashMap,ConcurrentHopscotchHashMap");
         for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_MULTIPLY_VALUE) {
             hashmapList.clear();
 
@@ -31,8 +28,7 @@ public class Main {
             hashmapList.add(new StripedCuckooHashMap<>(HASH_MAP_SIZE));
             hashmapList.add(new RefinableCuckooHashMap<>(HASH_MAP_SIZE));
             hashmapList.add(new ConcurrentHopscotchHashMap<>(HASH_MAP_SIZE, currentThreadCount));
-
-            System.out.print("\n" + currentThreadCount + ",");
+            result.append("\n").append(currentThreadCount).append(",");
             for (Map<Integer, Integer> hashMap : hashmapList) {
                 long totalTime = 0;
                 ArrayList<Thread> threadList = new ArrayList<>();
@@ -77,9 +73,10 @@ public class Main {
                 totalTime += estimatedTime;
 
                 // Общее время работы
-                System.out.print((double) totalTime / currentThreadCount / 1000000 + ",");
+                result.append((double) totalTime / currentThreadCount / 1000000).append(",");
             }
         }
+        System.out.print(result.toString());
     }
 
     // Добавление потоком в таблицу числа
