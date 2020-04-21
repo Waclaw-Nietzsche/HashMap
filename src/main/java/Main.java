@@ -2,38 +2,36 @@ import Interfaces.Map;
 import Realizations.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
     private final static int KEY_LIMIT_VALUE = 1000000;
+    private final static int HASH_MAP_SIZE = 1000;
+    private final static int MAX_THREADS_COUNT = 16;
+    private final static int THREAD_INCREMENT_VALUE = 2;
+    private final static int OPERATIONS_PER_THREAD = 1000;
 
     public static void main(String[] args) throws InterruptedException {
-        // Настройка параметров
-        int runsOfAlgorithm = 5;
-
-        int hashmapSize = 1000;
-
         int amountOfAddThreadOperations = 100;
         int amountOfGetThreadOperations = 100;
         int amountOfRemoveThreadOperations = 100;
         int amountOfContainsThreadOperations = 100;
 
-        int amountOfAddThreadOperationsRepeat = 1000;
-        int amountOfGetThreadOperationsRepeat = 1000;
-        int amountOfRemoveThreadOperationsRepeat = 1000;
-        int amountOfContainsThreadOperationsRepeat = 1000;
-
         ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<>();
 
-        hashmapList.add(new CoarseHashMap<>(hashmapSize));
-        hashmapList.add(new RefinableHashMap<>(hashmapSize));
-        hashmapList.add(new StripedCuckooHashMap<>(hashmapSize));
-        hashmapList.add(new RefinableCuckooHashMap<>(hashmapSize));
-        hashmapList.add(new ConcurrentHopscotchHashMap<>(hashmapSize, runsOfAlgorithm));
+        List<String> result = new ArrayList<>();
 
-        for (Map<Integer, Integer> hashmap : hashmapList) {
-            long totalTime = 0;
-            for (int currentRun = 0; currentRun < runsOfAlgorithm; currentRun += 1) {
+        for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_INCREMENT_VALUE) {
+            hashmapList.clear();
+            hashmapList.add(new CoarseHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new RefinableHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new StripedCuckooHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new RefinableCuckooHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new ConcurrentHopscotchHashMap<>(HASH_MAP_SIZE, currentThreadCount));
+
+            for (Map<Integer, Integer> hashMap : hashmapList) {
+                long totalTime = 0;
                 ArrayList<Thread> threadList = new ArrayList<>();
                 Thread currentThread;
 
@@ -41,27 +39,27 @@ public class Main {
 
                 // Put
                 for (int i = 0; i < amountOfAddThreadOperations; i++) {
-                    currentThread = new putThread(amountOfAddThreadOperationsRepeat, hashmap);
+                    currentThread = new putThread(OPERATIONS_PER_THREAD, hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
                 // Get
                 for (int i = 0; i < amountOfGetThreadOperations; i++) {
-                    currentThread = new getThread(amountOfGetThreadOperationsRepeat, hashmap);
+                    currentThread = new getThread(OPERATIONS_PER_THREAD, hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
 
                 // Contains
                 for (int i = 0; i < amountOfContainsThreadOperations; i++) {
-                    currentThread = new containsThread(amountOfContainsThreadOperationsRepeat, hashmap);
+                    currentThread = new containsThread(OPERATIONS_PER_THREAD, hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
 
                 // remove
                 for (int i = 0; i < amountOfRemoveThreadOperations; i++) {
-                    currentThread = new removeThread(amountOfRemoveThreadOperationsRepeat, hashmap);
+                    currentThread = new removeThread(OPERATIONS_PER_THREAD, hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
@@ -74,10 +72,10 @@ public class Main {
                 // Вычисление времени работы
                 long estimatedTime = System.nanoTime() - startTime;
                 totalTime += estimatedTime;
-            }
 
-            // Общее время работы
-            System.out.println(hashmap + "," + (double) totalTime / runsOfAlgorithm / 1000000 + " Миллисекунд.");
+                // Общее время работы
+                System.out.println(currentThreadCount + "," + hashMap + "," + (double) totalTime / currentThreadCount / 1000000 + " Миллисекунд.");
+            }
         }
     }
 
