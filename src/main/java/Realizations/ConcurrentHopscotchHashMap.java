@@ -30,7 +30,6 @@ public class ConcurrentHopscotchHashMap<K,V> implements Map<K,V>
     static final int _NULL_INDX = -1;
 
     // Внутренние классы
-
     static final class Segment<K, V> extends ReentrantLock
     {
 
