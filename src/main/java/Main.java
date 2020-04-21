@@ -9,21 +9,22 @@ public class Main {
     private final static int KEY_LIMIT_VALUE = 1000000;
     private final static int HASH_MAP_SIZE = 1000;
     private final static int MAX_THREADS_COUNT = 16;
-    private final static int THREAD_INCREMENT_VALUE = 2;
-    private final static int OPERATIONS_PER_THREAD = 1000;
+    private final static int THREAD_MULTIPLY_VALUE = 2;
+    private final static int OPERATIONS_PER_THREAD = 1000000;
+    private final static float ADD_RATIO = 0.25F;
+    private final static float GET_RATIO = 0.25F;
+    private final static float REMOVE_RATIO = 0.25F;
+    private final static float CONTAINS_RATIO = 0.25F;
 
     public static void main(String[] args) throws InterruptedException {
-        int amountOfAddThreadOperations = 100;
-        int amountOfGetThreadOperations = 100;
-        int amountOfRemoveThreadOperations = 100;
-        int amountOfContainsThreadOperations = 100;
 
         ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<>();
 
         List<String> result = new ArrayList<>();
 
-        for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_INCREMENT_VALUE) {
+        for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_MULTIPLY_VALUE) {
             hashmapList.clear();
+
             hashmapList.add(new CoarseHashMap<>(HASH_MAP_SIZE));
             hashmapList.add(new RefinableHashMap<>(HASH_MAP_SIZE));
             hashmapList.add(new StripedCuckooHashMap<>(HASH_MAP_SIZE));
@@ -38,28 +39,28 @@ public class Main {
                 long startTime = System.nanoTime();
 
                 // Put
-                for (int i = 0; i < amountOfAddThreadOperations; i++) {
-                    currentThread = new putThread(OPERATIONS_PER_THREAD, hashMap);
+                for (int i = 0; i < currentThreadCount; i++) {
+                    currentThread = new putThread((int) (OPERATIONS_PER_THREAD * ADD_RATIO), hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
                 // Get
-                for (int i = 0; i < amountOfGetThreadOperations; i++) {
-                    currentThread = new getThread(OPERATIONS_PER_THREAD, hashMap);
+                for (int i = 0; i < currentThreadCount; i++) {
+                    currentThread = new getThread((int) (OPERATIONS_PER_THREAD * GET_RATIO), hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
 
                 // Contains
-                for (int i = 0; i < amountOfContainsThreadOperations; i++) {
-                    currentThread = new containsThread(OPERATIONS_PER_THREAD, hashMap);
+                for (int i = 0; i < currentThreadCount; i++) {
+                    currentThread = new containsThread((int) (OPERATIONS_PER_THREAD * CONTAINS_RATIO), hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
 
-                // remove
-                for (int i = 0; i < amountOfRemoveThreadOperations; i++) {
-                    currentThread = new removeThread(OPERATIONS_PER_THREAD, hashMap);
+                // Remove
+                for (int i = 0; i < currentThreadCount; i++) {
+                    currentThread = new removeThread((int) (OPERATIONS_PER_THREAD * REMOVE_RATIO), hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
@@ -74,7 +75,7 @@ public class Main {
                 totalTime += estimatedTime;
 
                 // Общее время работы
-                System.out.println(currentThreadCount + "," + hashMap + "," + (double) totalTime / currentThreadCount / 1000000 + " Миллисекунд.");
+                System.out.println(currentThreadCount + "," + hashMap + "," + (double) totalTime / currentThreadCount / 1000000);
             }
         }
     }

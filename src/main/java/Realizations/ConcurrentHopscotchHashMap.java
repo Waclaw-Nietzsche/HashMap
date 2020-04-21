@@ -251,7 +251,7 @@ public class ConcurrentHopscotchHashMap<K, V> implements Map<K, V> {
 
         @Override
         public String toString() {
-            return this.getClass().getSimpleName();
+            return "ConcurrentHopscotchHashMap";
         }
 
         V get(final K key, final int hash) {
