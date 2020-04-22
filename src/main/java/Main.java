@@ -4,196 +4,94 @@ import Realizations.*;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Main
-{
-    final static int keyLimitValue = 1000000;
+public class Main {
+    private final static int KEY_LIMIT_VALUE = 1000000;
+    private final static int HASH_MAP_SIZE = 10000;
+    private final static int LOAD_FACTOR = 1;
+    private final static int MAX_THREADS_COUNT = 32;
+    private final static int THREAD_MULTIPLY_VALUE = 2;
+    private final static int OPERATIONS_PER_THREAD = 100000;
+    private final static int ADD_OPERATIONS_COUNT = (int) (0.23F * OPERATIONS_PER_THREAD);
+    private final static int GET_OPERATIONS_COUNT = (int) (0.23F * OPERATIONS_PER_THREAD);
+    private final static int REMOVE_OPERATIONS_COUNT = (int) (0.20F * OPERATIONS_PER_THREAD);
+    private final static int CONTAINS_OPERATIONS_COUNT = (int) (0.34F * OPERATIONS_PER_THREAD);
 
-    // Добавление потоком в таблицу числа
-    public static class putThread extends Thread
-    {
-        int iterations;
-        Map<Integer, Integer> hashmap;
+    public static void main(String[] args) throws InterruptedException {
 
-        putThread(int _iterations, Map<Integer, Integer> _hashmap)
-        {
-            this.iterations = _iterations;
-            this.hashmap = _hashmap;
-        }
+        ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<>();
 
-        public void run()
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                // Генерируем случайные значения от 0 до предела Integer
-                hashmap.put(ThreadLocalRandom.current().nextInt(0, keyLimitValue), ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-            }
-        }
-    }
+        StringBuilder result = new StringBuilder("Threads count,CoarseHashMap,RefinableHashMap,StripedCuckooHashmap,RefinableCuckooHashMap,ConcurrentHopscotchHashMap");
+        for (int currentThreadCount = 1; currentThreadCount <= MAX_THREADS_COUNT; currentThreadCount *= THREAD_MULTIPLY_VALUE) {
+            hashmapList.clear();
 
-    // Удаление потоком числа из таблицы
-    public static class removeThread extends Thread
-    {
-        int iterations;
-        Map<Integer, Integer> hashmap;
+            hashmapList.add(new CoarseHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new RefinableHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new StripedCuckooHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new RefinableCuckooHashMap<>(HASH_MAP_SIZE));
+            hashmapList.add(new ConcurrentHopscotchHashMap<>(HASH_MAP_SIZE, currentThreadCount));
+            result.append("\n").append(currentThreadCount).append(",");
+            for (Map<Integer, Integer> hashMap : hashmapList) {
+                //Initial data
+                generateInitialData(hashMap);
 
-        removeThread(int _iterations, Map<Integer, Integer> _hashmap)
-        {
-            this.iterations = _iterations;
-            this.hashmap = _hashmap;
-        }
-
-        public void run()
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                hashmap.remove(ThreadLocalRandom.current().nextInt(0, keyLimitValue));
-            }
-        }
-    }
-
-    // Проверка потоком наличия числа
-    public static class containsThread extends Thread
-    {
-        int iterations;
-        Map<Integer, Integer> hashmap;
-
-        containsThread(int _iterations, Map<Integer, Integer> _hashmap)
-        {
-            this.iterations = _iterations;
-            this.hashmap = _hashmap;
-        }
-
-        public void run()
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                hashmap.containsKey(ThreadLocalRandom.current().nextInt(0, keyLimitValue));
-            }
-        }
-    }
-
-    // Получение потоком числа из таблицы
-    public static class getThread extends Thread
-    {
-        int iterations;
-        Map<Integer, Integer> hashmap;
-
-        getThread(int _iterations, Map<Integer, Integer> _hashmap)
-        {
-            this.iterations = _iterations;
-            this.hashmap = _hashmap;
-        }
-
-        public void run()
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                hashmap.get(ThreadLocalRandom.current().nextInt(0, keyLimitValue));
-            }
-        }
-    }
-
-
-    public static void main(String[] args) throws InterruptedException
-    {
-        // Настройка параметров
-        int runsOfAlgorithm = 5;
-
-        int hashmapSize = 1000;
-
-        int amountOfAddThreadOperations = 100;
-        int amountOfGetThreadOperations = 100;
-        int amountOfRemoveThreadOperations = 100;
-        int amountOfContainsThreadOperations = 100;
-
-        int amountOfAddThreadOperationsRepeat = 1000;
-        int amountOfGetThreadOperationsRepeat = 1000;
-        int amountOfRemoveThreadOperationsRepeat = 1000;
-        int amountOfContainsThreadOperationsRepeat = 1000;
-
-        ArrayList<Map<Integer, Integer>> hashmapList = new ArrayList<Map<Integer, Integer>>();
-
-        hashmapList.add(new CoarseHashMap<>(hashmapSize));
-        hashmapList.add(new RefinableHashMap<>(hashmapSize));
-        hashmapList.add(new StripedCuckooHashMap<Integer, Integer>(hashmapSize));
-        hashmapList.add(new RefinableCuckooHashMap<Integer, Integer>(hashmapSize));
-        hashmapList.add(new ConcurrentHopscotchHashMap<Integer, Integer>(hashmapSize, runsOfAlgorithm));
-
-        for (int currentHashMapIndex = 0; currentHashMapIndex < hashmapList.size(); currentHashMapIndex += 1)
-        {
-            long totalTime = 0;
-            for (int currentRun = 0; currentRun < runsOfAlgorithm; currentRun += 1)
-            {
-                ArrayList<Thread> threadList = new ArrayList<Thread>();
+                //Threads
+                ArrayList<Thread> threadList = new ArrayList<>();
                 Thread currentThread;
 
                 long startTime = System.nanoTime();
 
-                // Put
-                for (int i = 0; i < amountOfAddThreadOperations; i++)
-                {
-                    currentThread = new putThread(amountOfAddThreadOperationsRepeat, hashmapList.get(currentHashMapIndex));
-                    threadList.add(currentThread);
-                    currentThread.start();
-                }
-                // Get
-                for (int i = 0; i < amountOfGetThreadOperations; i++)
-                {
-                    currentThread = new getThread(amountOfGetThreadOperationsRepeat, hashmapList.get(currentHashMapIndex));
+                for (int i = 0; i < currentThreadCount; i++) {
+                    currentThread = new OperationsThread(hashMap);
                     threadList.add(currentThread);
                     currentThread.start();
                 }
 
-                // Contains
-                for (int i = 0; i < amountOfContainsThreadOperations; i++)
-                {
-                    currentThread = new containsThread(amountOfContainsThreadOperationsRepeat, hashmapList.get(currentHashMapIndex));
-                    threadList.add(currentThread);
-                    currentThread.start();
-                }
-
-                // remove
-                for (int i = 0; i < amountOfRemoveThreadOperations; i++)
-                {
-                    currentThread = new removeThread(amountOfRemoveThreadOperationsRepeat, hashmapList.get(currentHashMapIndex));
-                    threadList.add(currentThread);
-                    currentThread.start();
-                }
-
-                // Синхронизация
-                for (Thread t : threadList)
-                {
+                // Sync
+                for (Thread t : threadList) {
                     t.join();
                 }
 
-                // Вычисление времени работы
-                long estimatedTime = System.nanoTime() - startTime;
-                totalTime += estimatedTime;
+                // Time measurement
+                double totalTimeMilliseconds = (System.nanoTime() - startTime) / 1000000.0;
+                // Time taken
+                result.append((OPERATIONS_PER_THREAD * currentThreadCount) / totalTimeMilliseconds).append(",");
             }
+        }
+        System.out.print(result.toString());
+    }
 
-
-            // Отображаем текущий алгоритм хеш-таблицы
-            switch (currentHashMapIndex)
-            {
-                case 0:
-                    System.out.println("Текущий алгоритм: CoarseHashMap");
-                    break;
-                case 1:
-                    System.out.println("Текущий алгоритм: RefinableHashMap");
-                    break;
-                case 2:
-                    System.out.println("Текущий алгоритм: StripedCuckooHashMap");
-                    break;
-                case 3:
-                    System.out.println("Текущий алгоритм: RefinableCuckooHashMap");
-                    break;
-                case 4:
-                    System.out.println("Текущий алгоритм: ConcurrentHopscotchHashMap");
-                    break;
-            }
-
-            // Общее время работы
-            System.out.println("Времени затрачено: " + (double) totalTime / runsOfAlgorithm / 1000000 + " Миллисекунд.");
+    private static void generateInitialData(Map<Integer, Integer> hashMap) {
+        for (int i = 0; i < HASH_MAP_SIZE * LOAD_FACTOR; i++) {
+            hashMap.put(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE), 2 * HASH_MAP_SIZE * LOAD_FACTOR);
         }
     }
+
+    public static class OperationsThread extends Thread {
+        private final Map<Integer, Integer> hashMap;
+
+        OperationsThread(Map<Integer, Integer> hashMap) {
+            this.hashMap = hashMap;
+        }
+
+        @Override
+        public void run() {
+            //Put
+            for (int i = 0; i < ADD_OPERATIONS_COUNT; i++) {
+                hashMap.put(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE), ThreadLocalRandom.current().nextInt(0, 2 * LOAD_FACTOR * HASH_MAP_SIZE));
+            }
+            //Contains
+            for (int i = 0; i < CONTAINS_OPERATIONS_COUNT; i++) {
+                hashMap.containsKey(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE));
+            }
+            //Remove
+            for (int i = 0; i < REMOVE_OPERATIONS_COUNT; i++) {
+                hashMap.remove(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE));
+            }
+            //Get
+            for (int i = 0; i < GET_OPERATIONS_COUNT; i++) {
+                hashMap.get(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE));
+            }
+        }
+    }
+
 }
