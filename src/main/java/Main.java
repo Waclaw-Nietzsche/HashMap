@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
-    private final static int KEY_LIMIT_VALUE = 100000;
+    private final static int KEY_LIMIT_VALUE = 1000000;
     private final static int HASH_MAP_SIZE = 1000;
     private final static int LOAD_FACTOR = 1;
     private final static int MAX_THREADS_COUNT = 32;
