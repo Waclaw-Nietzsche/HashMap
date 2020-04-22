@@ -6,15 +6,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
     private final static int KEY_LIMIT_VALUE = 1000000;
-    private final static int HASH_MAP_SIZE = 1000;
+    private final static int HASH_MAP_SIZE = 10000;
     private final static int LOAD_FACTOR = 1;
     private final static int MAX_THREADS_COUNT = 32;
     private final static int THREAD_MULTIPLY_VALUE = 2;
     private final static int OPERATIONS_PER_THREAD = 100000;
-    private final static int ADD_OPERATIONS_COUNT = (int) (0.25F * OPERATIONS_PER_THREAD);
-    private final static int GET_OPERATIONS_COUNT = (int) (0.25F * OPERATIONS_PER_THREAD);
-    private final static int REMOVE_OPERATIONS_COUNT = (int) (0.25F * OPERATIONS_PER_THREAD);
-    private final static int CONTAINS_OPERATIONS_COUNT = (int) (0.25F * OPERATIONS_PER_THREAD);
+    private final static int ADD_OPERATIONS_COUNT = (int) (0.23F * OPERATIONS_PER_THREAD);
+    private final static int GET_OPERATIONS_COUNT = (int) (0.23F * OPERATIONS_PER_THREAD);
+    private final static int REMOVE_OPERATIONS_COUNT = (int) (0.20F * OPERATIONS_PER_THREAD);
+    private final static int CONTAINS_OPERATIONS_COUNT = (int) (0.34F * OPERATIONS_PER_THREAD);
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -55,7 +55,6 @@ public class Main {
                 double totalTimeMilliseconds = (System.nanoTime() - startTime) / 1000000.0;
                 // Time taken
                 result.append((OPERATIONS_PER_THREAD * currentThreadCount) / totalTimeMilliseconds).append(",");
-                //result.append(totalTimeMilliseconds / currentThreadCount).append(",");
             }
         }
         System.out.print(result.toString());
@@ -95,21 +94,4 @@ public class Main {
         }
     }
 
-    // Добавление потоком в таблицу числа
-    public static class PutThread extends Thread {
-        int iterations;
-        Map<Integer, Integer> hashmap;
-
-        PutThread(int _iterations, Map<Integer, Integer> _hashmap) {
-            this.iterations = _iterations;
-            this.hashmap = _hashmap;
-        }
-
-        public void run() {
-            for (int i = 0; i < iterations; i++) {
-                // Генерируем случайные значения от 0 до предела Integer
-                hashmap.put(ThreadLocalRandom.current().nextInt(0, KEY_LIMIT_VALUE), ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-            }
-        }
-    }
 }
